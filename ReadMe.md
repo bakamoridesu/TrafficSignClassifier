@@ -83,12 +83,14 @@ The model has a little bit of overfitting, probably fine-tuning the dropout valu
 
 ### Test a Model on New Images
 
-Here are five German traffic signs that I found on the web:
+Here are five German traffic signs that I found on the web and the prediction results (shown as top 5 of softmax probabilities for every image):
 
-![bicycles_crossing][new_images/bicycles_crossing.jpg] 
-![no_entry][new_images/no_entry.jpg] 
-![road_works][new_images/road_works.jpg] 
-![roundabout][new_images/roundabout.jpg] 
-![turn_right][new_images/turn_right.jpg] 
+![bicycles_crossing_pred](/examples/bicycles_crossing_pred.jpg)
+![no_entry_pred](/examples/no_entry_pred.jpg)
+![road_work_pred](/examples/road_work_pred.jpg)
+![roundabout_pred](/examples/roundabout_pred.jpg)
+![turn_right_pred](/examples/turn_right_pred.jpg)
 
+The prediction results look nice and obvious. 
+For example, *Road work* sign's top 5 predictions consist of signs which have similar triangular shape.
 
