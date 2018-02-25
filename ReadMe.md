@@ -75,9 +75,9 @@ The key parameters were:
 
 #### 4. Model results:
 
-Final **Training accuracy** : **99.6%**
-Final **Validation accuracy** : **99.1%**
-Final **Validation accuracy** : **97.6%**
+* Final **Training accuracy** : **99.6%**
+* Final **Validation accuracy** : **99.1%**
+* Final **Validation accuracy** : **97.6%**
 
 The model has a little bit of overfitting, probably fine-tuning the dropout values is the way to prevent it.
 
