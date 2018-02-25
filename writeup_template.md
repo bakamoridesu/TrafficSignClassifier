@@ -27,117 +27,68 @@ Number of classes = 43
 
 Then I wanted to take a look at the images:
 
-![alt text][examples/samples]
+![samples](/examples/samples.jpg)
 
-### Design and Test a Model Architecture
+What I actually did in the project is I plotted one random image for every class in the dataset. This visualization showed that not all the signs are nicely centered. Some of the images are rotated, some of them are zoomed and some are sheared. A lot of pictures were taken at nighttime, so there is probably no need of keeping 3 color channels. 
 
-#### 1. Describe how you preprocessed the image data. What techniques were chosen and why did you choose these techniques? Consider including images showing the output of each preprocessing technique. Pre-processing refers to techniques such as converting to grayscale, normalization, etc. (OPTIONAL: As described in the "Stand Out Suggestions" part of the rubric, if you generated additional data for training, describe why you decided to generate additional data, how you generated the data, and provide example images of the additional data. Then describe the characteristics of the augmented training set like number of images in the set, number of images for each class, etc.)
+Then I wanted to know the number of sample images representing each class. The pyplot bar is ideal choice for this kind of visualization:
 
-As a first step, I decided to convert the images to grayscale because ...
+![first plot](/examples/first_plot.jpg)
 
-Here is an example of a traffic sign image before and after grayscaling.
+This step is very useful for future data augmentation. There is a large white space in this bar plot. It means that some classes are represented by much larger set of samples than the other ones. To normalize this situation I don't want to augment full dataset, I just want to fill up most of the white space of this bar.
 
-![alt text][image2]
+After those few steps I knew how to pre-process image and how to augment the data for better results.
 
-As a last step, I normalized the image data because ...
+#### 1. Data pre-processing and augmentation.
+Before pre-processing data I decided to generate more images for those classes which lack of samples. 
+The `keras.preprocessing.image.ImageDataGenerator` class was chosen for data augmentation.
+The idea is to generate more samples for the classes having the less samples:
+- 5x more sample batches for the classes having lesser than 400 samples
+- 3x more sample batches for the classes having lesser than 700 samples
+- 1 more sample batch for the classes having lesser than 1500 samples
+After generating new data (which is really just a little bit rotated, shifted, sheared and zoomed copies of existing images in the dataset) the Sample-Per-Class ratio become more balanced:
 
-I decided to generate additional data because ... 
-
-To add more data to the the data set, I used the following techniques because ... 
-
-Here is an example of an original image and an augmented image:
-
-![alt text][image3]
-
-The difference between the original data set and the augmented data set is the following ... 
-
-
-#### 2. Describe what your final model architecture looks like including model type, layers, layer sizes, connectivity, etc.) Consider including a diagram and/or table describing the final model.
-
-My final model consisted of the following layers:
-
-| Layer         		|     Description	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Input         		| 32x32x3 RGB image   							| 
-| Convolution 3x3     	| 1x1 stride, same padding, outputs 32x32x64 	|
-| RELU					|												|
-| Max pooling	      	| 2x2 stride,  outputs 16x16x64 				|
-| Convolution 3x3	    | etc.      									|
-| Fully connected		| etc.        									|
-| Softmax				| etc.        									|
-|						|												|
-|						|												|
- 
+![before_after](/examples/before_after.jpg)
 
 
-#### 3. Describe how you trained your model. The discussion can include the type of optimizer, the batch size, number of epochs and any hyperparameters such as learning rate.
+The first pre-processing step is converting image to grayscale. 
+Then I normalized image by dividing every pixel by 255.
+Finally I wanted to remove most of the noize and (if possible) to 'highlight' meaningful part of the image. I tried different approaches and finally I decided to use `exposure` from `scikit-learn`. The methods `equalize_adapthist` and `adjust_sigmoid` are doing almost exactly what I wanted to see. 
+The next few pairs of images show the difference between initial and pre-processed data.
 
-To train the model, I used an ....
+![preprocess](/examples/preprocess.jpg)
 
-#### 4. Describe the approach taken for finding a solution and getting the validation set accuracy to be at least 0.93. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
+After these steps the data was ready to be passed into the deep learning model.
 
-My final model results were:
-* training set accuracy of ?
-* validation set accuracy of ? 
-* test set accuracy of ?
+#### 2. Model architecture.
 
-If an iterative approach was chosen:
-* What was the first architecture that was tried and why was it chosen?
-* What were some problems with the initial architecture?
-* How was the architecture adjusted and why was it adjusted? Typical adjustments could include choosing a different model architecture, adding or taking away layers (pooling, dropout, convolution, etc), using an activation function or changing the activation function. One common justification for adjusting an architecture would be due to overfitting or underfitting. A high accuracy on the training set but low accuracy on the validation set indicates over fitting; a low accuracy on both sets indicates under fitting.
-* Which parameters were tuned? How were they adjusted and why?
-* What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
+My final model consisted of 3 convolutional layers and 3 fully-connected layers. Every layer contains relu and dropout, after every convolutional layer goes pooling layer. The output layer has 43 outputs. I also used L2 regularization for model weights.
 
-If a well known architecture was chosen:
-* What architecture was chosen?
-* Why did you believe it would be relevant to the traffic sign application?
-* How does the final model's accuracy on the training, validation and test set provide evidence that the model is working well?
- 
+![preprocess](/examples/model.jpg)
+
+#### 3. Training process.
+
+The data preprocessing and augmentation steps resulted really good training data, and for the first try I earned 96% of test accuracy. Then I spent a lot of time improving this result by fine-tuning the parameters.
+The key parameters were:
+- `beta` for L2 regularization. **Final value is 0.0003**
+- dropout values for convolutional layers **Final values are keep_prob = .9 for first two layers and .8 for the last layer**
+
+#### 4. Model results:
+
+Final **Training accuracy** : **99.6%**
+Final **Validation accuracy** : **99.1%**
+Final **Validation accuracy** : **97.6%**
+
+The model has a little bit of overfitting, probably fine-tuning the dropout values is the way to prevent it.
 
 ### Test a Model on New Images
 
-#### 1. Choose five German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
-
 Here are five German traffic signs that I found on the web:
 
-![alt text][image4] ![alt text][image5] ![alt text][image6] 
-![alt text][image7] ![alt text][image8]
-
-The first image might be difficult to classify because ...
-
-#### 2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
-
-Here are the results of the prediction:
-
-| Image			        |     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Stop Sign      		| Stop sign   									| 
-| U-turn     			| U-turn 										|
-| Yield					| Yield											|
-| 100 km/h	      		| Bumpy Road					 				|
-| Slippery Road			| Slippery Road      							|
-
-
-The model was able to correctly guess 4 of the 5 traffic signs, which gives an accuracy of 80%. This compares favorably to the accuracy on the test set of ...
-
-#### 3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
-
-The code for making predictions on my final model is located in the 11th cell of the Ipython notebook.
-
-For the first image, the model is relatively sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
-
-| Probability         	|     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
-
-
-For the second image ... 
-
-### (Optional) Visualizing the Neural Network (See Step 4 of the Ipython notebook for more details)
-#### 1. Discuss the visual output of your trained network's feature maps. What characteristics did the neural network use to make classifications?
+![bicycles_crossing][new_images/bicycles_crossing.jpg] 
+![no_entry][new_images/no_entry.jpg] 
+![road_works][new_images/road_works.jpg] 
+![roundabout][new_images/roundabout.jpg] 
+![turn_right][new_images/turn_right.jpg] 
 
 
